@@ -190,10 +190,61 @@ class Player():
             self.highest_y_check_count = 0
 
         if not self.gg:
+            # make sure palyer cant out of the screen
             if self.x < self.size / 2:
                 self.x = self.size / 2
             elif self.x > SCREEN_WIDTH - self.size / 2:
                 self.x = SCREEN_WIDTH - self.size / 2
+
+            for block in blocks.queue:
+                if collide((block.x, block.y, block.x + block.size),(self.x, self.y, self.x + self.size, self.y + self.size)):
+                    block.touched = True
+                    self.gg = True
+
+                    if not block.passed and next_block is None:
+                        next_block = block
+
+            if next_block != None:
+
+                if self.y - self.size > next_block.y and not next_block.passed:
+                    next_block.passed = True
+
+                    delta_reward += 0
+                    # score += 1
+
+            for tunnel in tunnels.queue:
+                tunnel_full = (0, tunnel.y - BAR_HEIGHT / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2)
+                tunnel_space = (tunnel.x - TUNNEL_OPENNESS / 2 + self.size, tunnel.y - BAR_HEIGHT / 2,
+                                tunnel.x + TUNNEL_OPENNESS / 2 - self.size, tunnel.y + BAR_HEIGHT / 2)
+
+                player = (self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)
+                if collide(tunnel_full, player):
+                    if not collide(tunnel_space, player):
+                        self.vx = self.vy = 0
+                        tunnel.touched = True
+                        self.gg = True
+
+                if tunnel.passed == False and next_tunnel is None:
+                    next_tunnel = tunnel
+
+            if len(tunnel.queue) > 0:
+                if self.y - self.size > next_tunnel.y and not next_tunnel.passed:
+                    next_tunnel.passed = True
+                    score += 1
+                    delta_reward += 1
+        
+
+        self.x += self.vx
+        self.y += self.vy
+
+        if self.y > self.highest.y:
+            self.highest_y = self.y
+
+        if self.started:
+            self.vy = -GRAVITY
+
+        return state, delta_reward
+
 
 
 
