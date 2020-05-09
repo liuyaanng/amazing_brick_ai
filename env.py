@@ -8,6 +8,8 @@ import numpy as np
 import os
 
 SCREEN_WIDTH = 600
+BOOST_H = 2
+BOOST_V = 9
 HIGHEST_Y_CHECK_EVERY = 400
 HIGHEST_MIN_IMPROVEMENT = 100
 BAR_HEIGHT = 30
@@ -244,6 +246,26 @@ class Player():
             self.vy = -GRAVITY
 
         return state, delta_reward
+
+    def action(self, choice):
+        """TODO: Docstring for action.
+
+        :choice: TODO
+        :returns: TODO
+
+        """
+        if AI_MODE:
+            self.ai_action = choice
+        if choice == 0:
+            self.started = True
+            self.vx = -BOOST_H
+            self.vy = BOOST_V
+        if choice == 2:
+            self.started = True
+            self.vx = BOOST_H
+            self.vy = BOOST_V
+
+
 
 
 
