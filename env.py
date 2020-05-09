@@ -13,6 +13,7 @@ BOOST_V = 9
 HIGHEST_Y_CHECK_EVERY = 400
 HIGHEST_MIN_IMPROVEMENT = 100
 BAR_HEIGHT = 30
+TUNNEL_SPACE = 500
 TUNNEL_OPENNESS = 130
 BLOCK_SIZE = 30
 PLAYER_SIZE = 26
@@ -264,6 +265,81 @@ class Player():
             self.started = True
             self.vx = BOOST_H
             self.vy = BOOST_V
+
+tunnels = Queue()
+blocks = Queue()
+
+
+class AmazingBrickEnv():
+
+    """Docstring for AmazingBrickEnv. """
+
+
+    def reset(self):
+        """TODO: Docstring for reset.
+        :returns: TODO
+
+        """
+        global score
+        global tunnels
+        global blocks
+        self.game_height = 0
+        score = 0
+        self.frames = 0
+        self.player = Player(SCREEN_WIDTH / 2, 20)
+        self.next_tunnel_y = TUNNEL_SPACE
+
+        tunnels = Queue()
+        blocks = Queue()
+
+        return self.player.get_state()
+
+
+    def __init__(self):
+        """TODO: to be defined. """
+        self.reset()
+        self.e = 0 # the currnet episode
+
+        
+    def step(self, action):
+        """TODO: Docstring for step.
+
+        :action: TODO
+        :returns: TODO
+
+        """
+        global tunnels
+        global blocks
+
+        self.palyer.action(action)
+        self.observation, reward = self.player.update()
+
+        if self.player.y - SCREEN_HIGHT / 2 > self.game_height:
+            self.game_height = self.player.y - SCREEN_HIGHT / 2
+
+        new_tunnel_needed = True
+        if len(tunnels.queue) > 0:
+            if tunnels.queue<0;91;10m[-1].y + TUNNEL_SPACE > SCREEN_HIGHT + self.game_height:
+                new_tunnel_needed = False
+            if tunnels.queue[0].y + 100 < self.game_height:
+                tunnels.get()
+        if len(blocks.queue) > 0:
+            if block.queue[0].y + 100 < self.game_height:
+                blocks.get()
+
+
+        while new_tunnel_needed:
+            new_tunnel = Tunnel(SCREEN_WIDTH / 2 + random.randint(-100, 100), self.next_tunnel_y)
+            new_block_1 = Block(SCREEN_WIDTH / 2 + random.randint(-random.randint(0, 150), random.randint(0,150)), self.next_tunnel_y + TUNNEL_SPACE / 3)
+            new_block_2 = Block(SCREEN_WIDTH / 2 + random.randint(-random.randint(0, 150), random.randint(0,150)), self.next_tunnel_y + 2 * TUNNEL_SPACE / 3)
+            tunnels.put(new_tunnel)
+            blocks.put(new_block_1)
+            blocks.put(new_block_2)
+
+            self.next_tunnel_y += TUNNEL_SPACE
+
+            if self.next_tunnel_y > self.game_height + SCREEN_HIGHT:
+                new_tunnel_needed = False
 
 
 
