@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import tebnsorflow as tf
+import tensorflow as tf
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Conv2D, Maxpolling, Activation, Flatten
+from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
 from keras.optimizers import Adam
 from keras.callbacks import TensorBoard
 from collections import deque
@@ -19,6 +19,7 @@ MODEL_NAME = "amamzingbrick"
 MINIBATCH_SIZE = 64
 DISCOUNT = 0.99
 UPDATE_TARGET_EVERY = 5
+OBSERVATION_SPACE_VALUES = (3, 3, 2)
 # Own Tensorboard class
 class ModifiedTensorBoard(TensorBoard):
 
@@ -83,23 +84,23 @@ class DQNAgent:
         """
         model = Sequential()
 
-        model.add(Conv2D(256, (3, 3), input_shape=env.OBSERVATION_SPACE_VALUES))
+        model.add(Conv2D(256, (3, 3), input_shape=OBSERVATION_SPACE_VALUES))
         model.add(Activation('relu'))
-        model.add(Maxpolling2D(pool_size = (2, 2)))
-        model.add(Dropout(0.2))
+        # model.add(MaxPooling2D(pool_size = (2, 2)))
+        # model.add(Dropout(0.2))
         
 
-        model.add(Conv2D(256, (3, 3)))
+        model.add(Conv2D(256, (1, 1)))
         model.add(Activation('relu'))
-        model.add(Maxpolling2D(pool_size = (2, 2)))
-        model.add(Dropout(0.2))
+        # model.add(MaxPooling2D(pool_size = (2, 2)))
+        # model.add(Dropout(0.2))
 
 
         model.add(Flatten())
         model.add(Dense(64))
 
 
-        model.add(Dense(env.ACTION_SPACE_SIZE, activation = 'linear'))
+        model.add(Dense(3, activation = 'linear'))
         model.compile(loss='mse', optimizer=Adam(lr=0.001), metrics=['accuracy'])
 
         return model
@@ -118,7 +119,7 @@ class DQNAgent:
         :returns: TODO
 
         """
-        return self.model.predict(np.array(state).reshape(-1, *state.shape)/255)[0]
+        return self.model.predict(np.array(state).reshape(-1, *state.shape))[0]
 
     def trian(self, terminal_state, step):
         """TODO: Docstring for trian.

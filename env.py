@@ -3,8 +3,6 @@
 import arcade
 import time
 import random
-from PIL import Image
-import cv2
 from queue import Queue
 import numpy as np
 import os
@@ -23,6 +21,7 @@ BLOCK_SIZE = 30
 PLAYER_SIZE = 26
 NO_OP_MAX = 300
 
+SHOW_PREVIEW = True
 def collide(box1, box2):
     """TODO: Docstring for collide.
 
@@ -169,13 +168,23 @@ class Player():
             self.x - self.size / 2 - next_tunnel_x + TUNNEL_OPENNESS / 2,
             next_tunnel_x + TUNNEL_OPENNESS / 2 - self.x - self.size / 2,
             next_tunnel_y - self.y - BAR_HEIGHT / 2 - self.size / 2,
+            
+            next_block2_y - self.y - BLOCK_SIZE / 2 - self.size / 2,
+            next_block1_y - self.y - BLOCK_SIZE / 2 - self.size / 2,
+            self.y - next_block2_y - BLOCK_SIZE / 2 - self.size / 2,
+            self.y - next_block1_y - BLOCK_SIZE / 2 - self.size / 2,
 
+            next_block2_x - self.x - BLOCK_SIZE / 2 - self.size / 2,
+            next_block1_x - self.x - BLOCK_SIZE / 2 - self.size / 2,
+            self.x - next_block2_x - BLOCK_SIZE / 2 - self.size / 2,
+            self.x - next_block1_x - BLOCK_SIZE / 2 - self.size / 2,
             next_block1_x - self.x,
             next_block1_y - self.y,
             next_block2_x - self.x,
             next_block2_y - self.y,
             self.y- self.size / 2 - bottom_y - BAR_HEIGHT / 2,
             self.vx, self.vy])
+        state = state.reshape(3,3,2)
 
         return state
 
@@ -190,7 +199,7 @@ class Player():
         delta_reward = 0  # 0.1
 
         state = self.get_state()
-
+        print(state.shape)
         self.highest_y_check_count += 1
         if self.highest_y_check_count > HIGHEST_Y_CHECK_EVERY:
             if self.highest_y - self.highest_y_last_check < HIGHEST_MIN_IMPROVEMENT:
@@ -287,7 +296,8 @@ class Player():
 class AmazingBrickEnv():
 
     """Docstring for AmazingBrickEnv. """
-
+    
+    ACTION_SPACE_SIZE = 3
 
     def reset(self):
         """TODO: Docstring for reset.
@@ -380,7 +390,9 @@ class AmazingBrickEnv():
         
         if SHOW_PREVIEW:
             self.render()
-
+        image = arcade.get_image(0, 0, width = int(SCREEN_WIDTH), height = int(SCREEN_HIGHT) )
+        # image.save('test.png')
+        return self.observation, reward, is_game_running
     def render(self):
         arcade.start_render()
         # arcade.draw_circle_filled(300,200,26,arcade.color.GREEN)
@@ -394,19 +406,19 @@ class AmazingBrickEnv():
             arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2 - self.player.size, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
             arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2 + self.player.size, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
 
-def main():
-    ENV = AmazingBrickEnv()
+# def main():
+    # ENV = AmazingBrickEnv()
 
-    arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
-    arcade.set_background_color(arcade.color.WHITE)
+    # arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
+    # arcade.set_background_color(arcade.color.WHITE)
 
-    arcade.schedule(ENV.step, 1/ 60)
+    # arcade.schedule(ENV.step, 1/ 60)
 
-    arcade.run()
+    # arcade.run()
 
-    arcade.close_window()
+    # arcade.close_window()
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+    # main()
 
