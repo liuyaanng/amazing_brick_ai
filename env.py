@@ -21,7 +21,7 @@ TUNNEL_SPACE = 500
 TUNNEL_OPENNESS = 130
 BLOCK_SIZE = 30
 PLAYER_SIZE = 26
-
+NO_OP_MAX = 300
 
 def collide(box1, box2):
     """TODO: Docstring for collide.
@@ -107,6 +107,8 @@ class Player():
         self.highest_y = 0
         self.highest_y_last_check = 0
         self.highest_y_check_count = 0
+        
+        self.useless_action_num = 0
 
         # if AI_MODE:
             # self.ai_action = 0
@@ -244,8 +246,10 @@ class Player():
                     next_tunnel.passed = True
                     score += 1
                     delta_reward += 1
-        
-
+                    self.useless_action_num = 0
+        # print(self.useless_action_num)
+        if self.useless_action_num > NO_OP_MAX:
+            self.gg = True
         self.x += self.vx
         self.y += self.vy
 
@@ -255,7 +259,7 @@ class Player():
         if self.started:
             self.vy = -GRAVITY
 
-        return state, delta_reward
+        return state, delta_reward, self.gg
 
     def action(self, choice):
         """TODO: Docstring for action.
@@ -275,6 +279,8 @@ class Player():
             self.started = True
             self.vx = BOOST_H
             self.vy = BOOST_V
+
+        self.useless_action_num += 1
 
 
 
@@ -296,9 +302,11 @@ class AmazingBrickEnv():
         self.frames = 0
         self.player = Player(SCREEN_WIDTH / 2, 20)
         self.next_tunnel_y = TUNNEL_SPACE
+        self.is_game_running = True
         AI_MODE = False
         tunnels = Queue()
         blocks = Queue()
+        
 
         return self.player.get_state()
 
@@ -321,10 +329,10 @@ class AmazingBrickEnv():
         action = random.randint(0,2)
         # action = 1
         self.player.action(action)
-        self.observation, reward = self.player.update()
+        self.observation, reward , is_game_running= self.player.update()
         # print(self.observation, reward)
         
-
+        print("score:", score)
         changed = False
     
         if self.player.y - SCREEN_HIGHT / 2 > self.game_height:
@@ -369,7 +377,11 @@ class AmazingBrickEnv():
             # time.sleep(0.3)
             self.reset()
             arcade.set_viewport(0, SCREEN_WIDTH, 0, SCREEN_HIGHT)
+        
+        if SHOW_PREVIEW:
+            self.render()
 
+    def render(self):
         arcade.start_render()
         # arcade.draw_circle_filled(300,200,26,arcade.color.GREEN)
         arcade.draw_circle_filled(self.player.x + self.player.size / 2, self.player.y + self.player.size / 2, self.player.size / 2, arcade.color.BLACK)
@@ -393,18 +405,8 @@ def main():
     arcade.run()
 
     arcade.close_window()
+
+
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-        
-        
-        
-
 
