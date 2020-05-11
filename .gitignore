@@ -1,0 +1,7 @@
+
+
+
+logs/
+models/
+__pycache__
+.DS_Store

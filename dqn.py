@@ -10,15 +10,8 @@ import time
 import random
 
 from env import *
+from cfg import *
 
-
-REPLAY_MEMORY_SIZE = 50000
-MIN_REPLAY_MEMORY_SIZE = 1000
-MODEL_NAME = "amamzingbrick"
-MINIBATCH_SIZE = 64
-DISCOUNT = 0.99
-UPDATE_TARGET_EVERY = 5
-OBSERVATION_SPACE_VALUES = (3, 3, 2)
 # Own Tensorboard class
 class ModifiedTensorBoard(TensorBoard):
 
@@ -83,13 +76,13 @@ class DQNAgent:
         """
         model = Sequential()
 
-        model.add(Conv2D(256, (3, 3), input_shape=OBSERVATION_SPACE_VALUES))
+        model.add(Conv2D(500, (3, 3), input_shape=OBSERVATION_SPACE_VALUES))
         model.add(Activation('relu'))
         # model.add(MaxPooling2D(pool_size = (2, 2)))
         # model.add(Dropout(0.2))
         
 
-        model.add(Conv2D(256, (1, 1)))
+        model.add(Conv2D(500, (1, 1)))
         model.add(Activation('relu'))
         # model.add(MaxPooling2D(pool_size = (2, 2)))
         # model.add(Dropout(0.2))

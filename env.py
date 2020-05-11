@@ -6,24 +6,7 @@ import random
 from queue import Queue
 import numpy as np
 import os
-
-SCREEN_WIDTH = 600
-SCREEN_HIGHT = 800
-BOOST_H = 4
-BOOST_V = 10
-GRAVITY = 5
-HIGHEST_Y_CHECK_EVERY = 400
-HIGHEST_MIN_IMPROVEMENT = 100
-BAR_HEIGHT = 30
-TUNNEL_SPACE = 500
-TUNNEL_OPENNESS = 130
-BLOCK_SIZE = 30
-PLAYER_SIZE = 26
-NO_OP_MAX = 300
-
-SHOW_PREVIEW = True
-
-MAX_SCORE = 0
+from cfg import *
 def collide(box1, box2):
     """TODO: Docstring for collide.
 

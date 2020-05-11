@@ -20,7 +20,6 @@ MIN_EPSILON = 0.01
 
 # Ststs setting
 AGGREGATE_STATS_EVERY = 50 # episodes
-SHOW_PREVIEW = True
 
 
 env = AmazingBrickEnv()
@@ -40,7 +39,7 @@ if not os.path.isdir('models'):
 agent = DQNAgent()
 
 max_score = 0
-arcade.open_window(600, 800, 'AmazingBrick')
+arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
 arcade.set_background_color(arcade.color.WHITE)
 episode = 0
 
