@@ -22,6 +22,8 @@ PLAYER_SIZE = 26
 NO_OP_MAX = 300
 
 SHOW_PREVIEW = True
+
+MAX_SCORE = 0
 def collide(box1, box2):
     """TODO: Docstring for collide.
 
@@ -199,7 +201,7 @@ class Player():
         delta_reward = 0  # 0.1
 
         state = self.get_state()
-        print(state.shape)
+        #print(state.shape)
         self.highest_y_check_count += 1
         if self.highest_y_check_count > HIGHEST_Y_CHECK_EVERY:
             if self.highest_y - self.highest_y_last_check < HIGHEST_MIN_IMPROVEMENT:
@@ -268,7 +270,7 @@ class Player():
         if self.started:
             self.vy = -GRAVITY
 
-        return state, delta_reward, self.gg
+        return state, delta_reward, bool(1-self.gg)
 
     def action(self, choice):
         """TODO: Docstring for action.
@@ -305,12 +307,14 @@ class AmazingBrickEnv():
 
         """
         global score
+        
         global tunnels
         global blocks
         self.game_height = 0
         score = 0
+        
         self.frames = 0
-        self.player = Player(SCREEN_WIDTH / 2, 20)
+        self.player = Player(SCREEN_WIDTH / 2, 400)
         self.next_tunnel_y = TUNNEL_SPACE
         self.is_game_running = True
         AI_MODE = False
@@ -324,7 +328,7 @@ class AmazingBrickEnv():
     def __init__(self):
         """TODO: to be defined. """
         self.reset()
-        self.e = 1 # the currnet episode
+        self.e = 0 # the currnet episode
 
         
     def step(self, action):
@@ -339,10 +343,11 @@ class AmazingBrickEnv():
         action = random.randint(0,2)
         # action = 1
         self.player.action(action)
+        self.observation, reward , is_game_running= self.player.update()
         # print(self.observation, reward)
-        
-        print("score:", score)
+        #print("score:", score)
         changed = False
+        #print("position is (%s, %s)" %(self.player.x, self.player.y))
     
         if self.player.y - SCREEN_HIGHT / 2 > self.game_height:
             self.game_height = self.player.y - SCREEN_HIGHT / 2
@@ -380,76 +385,35 @@ class AmazingBrickEnv():
 
 
         if self.player.gg:
-            tunnels.queue.clear()
-            blocks.queue.clear()
+            #tunnels.queue.clear()
+            #blocks.queue.clear()
             # print("bugs", len(tunnels.queue),len(blocks.queue))
             # time.sleep(0.3)
+            print("game terimnaled")
             self.reset()
             arcade.set_viewport(0, SCREEN_WIDTH, 0, SCREEN_HIGHT)
         
-        if SHOW_PREVIEW:
-            self.render()
-        # image = arcade.get_image(0, 0, width = int(SCREEN_WIDTH), height = int(SCREEN_HIGHT) )
+        
+        #print("start render")
+ 
+        self.render()
+        #image = arcade.get_image(0, 0, width = int(SCREEN_WIDTH), height = int(SCREEN_HIGHT) )
         # image.save('test.png')
-
-        agent.tensorboard.step = self.e
-
-        episode_reward = 0
-        step = 1
-        current_state = env.reset()
-        print(current_state)
-        is_game_running = True
-
-
-        while is_game_running:
-            if np.random.random() > epsilon:
-                action = np.argmax(agent.get_qs(current_state))
-            else:
-                action = np.random.randint(0, env.ACTION_SPACE_SIZE)
-            new_state, reward, is_game_running = self.player.update
-            print(new_state)
-
-            episode_reward += reward
-            print(episode_reward)
-            if SHOW_PREVIEW and not episode % AGGREGATE_STATS_EVERY:
-                env.render()
-
-            agent.update_replay_memory((current_state, action, reward, new_state, is_game_running))
-
-            agent.train(is_game_running, step)
-
-            current_state = new_state
-
-            step += 1
-            self.e += 1
-
-
-            # Append episode reward to a list and log stats (every given number of episodes)
-        ep_rewards.append(episode_reward)
-        if not episode % AGGREGATE_STATS_EVERY or episode == 1:
-            average_reward = sum(ep_rewards[-AGGREGATE_STATS_EVERY:])/len(ep_rewards[-AGGREGATE_STATS_EVERY:])
-            min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
-            max_reward = max(ep_rewards[-AGGREGATE_STATS_EVERY:])
-            agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=epsilon)
-
-            # Save model, but only when min reward is greater or equal a set value
-            if min_reward >= MIN_REWARD:
-                agent.model.save(f'models/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.model')
-
-        # Decay epsilon
-        if epsilon > MIN_EPSILON:
-            epsilon *= EPSILON_DECAY
-            epsilon = max(MIN_EPSILON, epsilon)
-
-
-
-        return self.observation, reward, is_game_running
+        return self.observation, reward, is_game_running, score
     def render(self):
         arcade.start_render()
         # arcade.draw_circle_filled(300,200,26,arcade.color.GREEN)
-        arcade.draw_circle_filled(self.player.x + self.player.size / 2, self.player.y + self.player.size / 2, self.player.size / 2, arcade.color.BLACK)
-
+        print("into render")
+        player_x = self.player.x + self.player.size / 2
+        player_y = self.player.y + self.player.size / 2
+        print(player_x, player_y)
+        arcade.draw_circle_filled(player_x, player_y, self.player.size / 2, arcade.color.BLACK) 
+        #print(self.player.x + self.player.size / 2, self.player.y + self.player.size / 2)
+ #       arcade.draw_circle_filled(self.player.x + self.player.size / 2, self.player.y + self.player.size / 2, self.player.size / 2, arcade.color.BLACK)
+ #      arcade.draw_circle_filled(100, self.player.y + self.player.size / 2, self.player.size / 2, arcade.color.BLACK)
+#
         for block in blocks.queue:
+            #print(block.x, block.y)
             arcade.draw_circle_filled(block.x + block.size / 2, block.y + block.size / 2, block.size / 2, arcade.color.RED)
         
         for tunnel in tunnels.queue:

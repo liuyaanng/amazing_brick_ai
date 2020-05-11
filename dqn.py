@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
@@ -121,7 +120,7 @@ class DQNAgent:
         """
         return self.model.predict(np.array(state).reshape(-1, *state.shape))[0]
 
-    def trian(self, terminal_state, step):
+    def train(self, terminal_state, step):
         """TODO: Docstring for trian.
 
         :terminal_state: TODO
@@ -157,7 +156,7 @@ class DQNAgent:
                 new_q = reward + DISCOUNT * max_future_q
 
             # Update Q value for given state
-            currnet_qs = current_qs_list[index]
+            current_qs = current_qs_list[index]
             current_qs[action] = new_q
 
             # and append to training data
