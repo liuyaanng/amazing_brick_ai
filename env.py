@@ -401,8 +401,8 @@ class AmazingBrickEnv():
         
         for tunnel in tunnels.queue:
             # print(tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2)
-            arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2 - self.player.size, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
-            arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2 + self.player.size, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+            arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2 + self.player.size, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+            arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2 - self.player.size, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
 
 # def main():
     # ENV = AmazingBrickEnv()
