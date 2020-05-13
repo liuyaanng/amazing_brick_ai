@@ -392,7 +392,8 @@ class AmazingBrickEnv():
         
         #print("start render")
  
-        self.render()
+        if SHOW_PREVIEW:
+            self.render()
         #image = arcade.get_image(0, 0, width = int(SCREEN_WIDTH), height = int(SCREEN_HIGHT) )
         # image.save('test.png')
         return self.observation, reward, is_game_running, score

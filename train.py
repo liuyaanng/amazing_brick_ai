@@ -11,8 +11,8 @@ from tqdm import tqdm
 
 
 # Environment setting
-EPISODES = 20
-MIN_REWARD = 0
+EPISODES = 20000
+MIN_REWARD = 3
 # Exploration setting
 epsilon = 1
 EPSILON_DECAY = 0.99975
@@ -39,21 +39,21 @@ if not os.path.isdir('models'):
 agent = DQNAgent()
 
 max_score = 0
-arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
-arcade.set_background_color(arcade.color.WHITE)
+# arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
+# arcade.set_background_color(arcade.color.WHITE)
 episode = 0
 
 def main(_delta_time):
     global max_score
     global episode
     global epsilon
-    print("first = ", episode)
+    # print("first = ", episode)
     agent.tensorboard.step = episode
 
     episode_reward = 0
     step = 1
     current_state = env.player.get_state()
-    print(current_state)
+    # print(current_state)
     #print(current_state)
     is_game_running = True
 
@@ -107,8 +107,7 @@ def main(_delta_time):
     episode += 1
     print("final episode = ", episode)
 
-arcade.schedule(main,1)
-#arcade.schedule(env.render(), 1/60)
+arcade.schedule(env.render(), 1/60)
 arcade.run()
 arcade.close_window()
 
