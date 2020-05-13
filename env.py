@@ -39,8 +39,8 @@ class Tunnel():
     def __init__(self, loc_x, loc_y):
         """TODO: to be defined.
 
-        :loc_x: TODO
-        :loc_y: TODO
+        :loc_x: Tunnel space / 2
+        :loc_y: Tunnel space / 2
 
         """
 
@@ -56,8 +56,8 @@ class Block():
     def __init__(self, loc_x, loc_y, size = BLOCK_SIZE):
         """TODO: to be defined.
 
-        :loc_x: TODO
-        :loc_y: TODO
+        :loc_x: the center of a circle
+        :loc_y: the center of a circle
         :size: TODO
 
         """
@@ -75,8 +75,8 @@ class Player():
     def __init__(self, starting_x, starting_y, size = PLAYER_SIZE):
         """TODO: to be defined.
 
-        :starting_x: TODO
-        :starting_y: TODO
+        :starting_x: The center of player circle
+        :starting_y: The center of player circle
         :size: TODO
 
         """
@@ -150,9 +150,15 @@ class Player():
                     next_block2_y = next_block2.y
 
         state = np.array([
+            # the distance between 
+            # player left and next tunnel left
             self.x - self.size / 2 - next_tunnel_x + TUNNEL_OPENNESS / 2,
+            # player right and next tunnel right
             next_tunnel_x + TUNNEL_OPENNESS / 2 - self.x - self.size / 2,
+            # player top and next tunnel bottom
             next_tunnel_y - self.y - BAR_HEIGHT / 2 - self.size / 2,
+            # player botton and last tunnel top
+            self.y - self.size / 2 - bottom_y - BAR_HEIGHT / 2,
             
             next_block2_y - self.y - BLOCK_SIZE / 2 - self.size / 2,
             next_block1_y - self.y - BLOCK_SIZE / 2 - self.size / 2,
@@ -163,11 +169,14 @@ class Player():
             next_block1_x - self.x - BLOCK_SIZE / 2 - self.size / 2,
             self.x - next_block2_x - BLOCK_SIZE / 2 - self.size / 2,
             self.x - next_block1_x - BLOCK_SIZE / 2 - self.size / 2,
+            # x distance of block1 and player
             next_block1_x - self.x,
+            # y distance of block1 and player
             next_block1_y - self.y,
+            # x distance of block2 and player
             next_block2_x - self.x,
+            # y distance of block2 and player
             next_block2_y - self.y,
-            self.y- self.size / 2 - bottom_y - BAR_HEIGHT / 2,
             self.vx, self.vy])
         state = state.reshape(3,3,2)
 
@@ -200,7 +209,7 @@ class Player():
                 self.x = SCREEN_WIDTH - self.size / 2
 
             for block in blocks.queue:
-                if collide((block.x, block.y, block.x + block.size, block.y + block.size),(self.x, self.y, self.x + self.size, self.y + self.size)):
+                if collide((block.x + block.size / 2, block.y - block.size / 2, block.x + block.size / 2, block.y + block.size / 2),(self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)):
                     block.touched = True
                     self.gg = True
 
@@ -219,8 +228,8 @@ class Player():
                 # print("tunnels queue:", tunnels.queue[0])
             for tunnel in tunnels.queue:
                 tunnel_full = (0, tunnel.y - BAR_HEIGHT / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2)
-                tunnel_space = (tunnel.x - TUNNEL_OPENNESS / 2 + self.size, tunnel.y - BAR_HEIGHT / 2,
-                                tunnel.x + TUNNEL_OPENNESS / 2 - self.size, tunnel.y + BAR_HEIGHT / 2)
+                tunnel_space = (tunnel.x - TUNNEL_OPENNESS / 2 + self.size / 2, tunnel.y - BAR_HEIGHT / 2,
+                                tunnel.x + TUNNEL_OPENNESS / 2 - self.size / 2, tunnel.y + BAR_HEIGHT / 2)
 
                 player = (self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)
                 if collide(tunnel_full, player):
@@ -323,14 +332,18 @@ class AmazingBrickEnv():
         """
         global tunnels
         global blocks
-        action = random.randint(0,2)
+        # action = random.randint(0,2)
         # action = 1
         self.player.action(action)
         self.observation, reward , is_game_running= self.player.update()
         # print(self.observation, reward)
         #print("score:", score)
+        
+        # if player out of the view, game over
+        if self.player.y < self.game_height:
+            self.player.gg = True
         changed = False
-        #print("position is (%s, %s)" %(self.player.x, self.player.y))
+        print("position is (%s, %s)" %(self.player.x, self.player.y))
     
         if self.player.y - SCREEN_HIGHT / 2 > self.game_height:
             self.game_height = self.player.y - SCREEN_HIGHT / 2
@@ -397,12 +410,12 @@ class AmazingBrickEnv():
 #
         for block in blocks.queue:
             #print(block.x, block.y)
-            arcade.draw_circle_filled(block.x + block.size / 2, block.y + block.size / 2, block.size / 2, arcade.color.RED)
+            arcade.draw_circle_filled(block.x, block.y, block.size / 2, arcade.color.RED)
         
         for tunnel in tunnels.queue:
             # print(tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2)
-            arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2 + self.player.size, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
-            arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2 - self.player.size, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+            arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+            arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
 
 # def main():
     # ENV = AmazingBrickEnv()

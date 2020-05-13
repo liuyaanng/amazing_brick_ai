@@ -84,7 +84,7 @@ def main(_delta_time):
             max_score = score
 
         print('Episode %s ,Current score is %s, Max Score is %s' %(episode,score, max_score))
-    print(" not run")
+    # print(" not run")
     
     #print("run")
    #arcade.close_window()
