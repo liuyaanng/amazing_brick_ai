@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import tensorflow as tf
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
 from keras.optimizers import Adam
 from keras.callbacks import TensorBoard
@@ -12,6 +12,7 @@ import random
 from env import *
 from cfg import *
 
+LOAD_MODEL = None
 # Own Tensorboard class
 class ModifiedTensorBoard(TensorBoard):
 
@@ -74,26 +75,31 @@ class DQNAgent:
         :returns: TODO
 
         """
-        model = Sequential()
+        if LOAD_MODEL is not None:
+            print(f"Loading {LOAD_MODEL}")
+            model = load_model(LOAD_MODEL)
+            print(f"Model {LOAD_MODEL} loaded")
+        else:
+            model = Sequential()
 
-        model.add(Conv2D(500, (3, 3), input_shape=OBSERVATION_SPACE_VALUES))
-        model.add(Activation('relu'))
-        # model.add(MaxPooling2D(pool_size = (2, 2)))
-        # model.add(Dropout(0.2))
-        
+            model.add(Conv2D(500, (2, 2), input_shape=OBSERVATION_SPACE_VALUES))
+            model.add(Activation('relu'))
+            model.add(MaxPooling2D(pool_size = (1, 1)))
+            # model.add(Dropout(0.2))
+            
 
-        model.add(Conv2D(500, (1, 1)))
-        model.add(Activation('relu'))
-        # model.add(MaxPooling2D(pool_size = (2, 2)))
-        # model.add(Dropout(0.2))
-
-
-        model.add(Flatten())
-        model.add(Dense(64))
+            model.add(Conv2D(500, (2, 2)))
+            model.add(Activation('relu'))
+            model.add(MaxPooling2D(pool_size = (2, 2)))
+            # model.add(Dropout(0.2))
 
 
-        model.add(Dense(3, activation = 'linear'))
-        model.compile(loss='mse', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+            model.add(Flatten())
+            model.add(Dense(64))
+
+
+            model.add(Dense(3, activation = 'linear'))
+            model.compile(loss='mse', optimizer=Adam(lr=0.001), metrics=['accuracy'])
 
         return model
 

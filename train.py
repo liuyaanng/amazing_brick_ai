@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 # Environment setting
 EPISODES = 20000
-MIN_REWARD = 3
+MIN_REWARD = 0.5
 # Exploration setting
 epsilon = 1
 EPSILON_DECAY = 0.99975
@@ -39,8 +39,8 @@ if not os.path.isdir('models'):
 agent = DQNAgent()
 
 max_score = 0
-# arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
-# arcade.set_background_color(arcade.color.WHITE)
+arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
+arcade.set_background_color(arcade.color.WHITE)
 episode = 0
 
 def main(_delta_time):
@@ -107,7 +107,7 @@ def main(_delta_time):
     episode += 1
     print("final episode = ", episode)
 
-arcade.schedule(env.render(), 1/60)
+arcade.schedule(main, 1/60)
 arcade.run()
 arcade.close_window()
 

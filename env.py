@@ -306,7 +306,7 @@ class AmazingBrickEnv():
         score = 0
         
         self.frames = 0
-        self.player = Player(SCREEN_WIDTH / 2, 400)
+        self.player = Player(SCREEN_WIDTH / 2, 20)
         self.next_tunnel_y = TUNNEL_SPACE
         self.is_game_running = True
         AI_MODE = False
@@ -392,8 +392,8 @@ class AmazingBrickEnv():
         
         #print("start render")
  
-        if SHOW_PREVIEW:
-            self.render()
+        # if SHOW_PREVIEW:
+        self.render()
         #image = arcade.get_image(0, 0, width = int(SCREEN_WIDTH), height = int(SCREEN_HIGHT) )
         # image.save('test.png')
         return self.observation, reward, is_game_running, score
@@ -404,19 +404,20 @@ class AmazingBrickEnv():
         player_x = self.player.x + self.player.size / 2
         player_y = self.player.y + self.player.size / 2
         print(player_x, player_y)
-        arcade.draw_circle_filled(player_x, player_y, self.player.size / 2, arcade.color.BLACK) 
+        arcade.draw_circle_filled(np.random.randint(0, 800), player_y, self.player.size / 2, arcade.color.BLACK) 
         #print(self.player.x + self.player.size / 2, self.player.y + self.player.size / 2)
  #       arcade.draw_circle_filled(self.player.x + self.player.size / 2, self.player.y + self.player.size / 2, self.player.size / 2, arcade.color.BLACK)
  #      arcade.draw_circle_filled(100, self.player.y + self.player.size / 2, self.player.size / 2, arcade.color.BLACK)
-#
-        for block in blocks.queue:
-            #print(block.x, block.y)
-            arcade.draw_circle_filled(block.x, block.y, block.size / 2, arcade.color.RED)
-        
-        for tunnel in tunnels.queue:
-            # print(tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2)
-            arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
-            arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+
+        # if blocks.queue:
+            # for block in blocks.queue:
+                # #print(block.x, block.y)
+                # arcade.draw_circle_filled(block.x, block.y, block.size / 2, arcade.color.RED)
+        # if tunnels.queue:
+            # for tunnel in tunnels.queue:
+                # # print(tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2)
+                # arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+                # arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
 
 # def main():
     # ENV = AmazingBrickEnv()
