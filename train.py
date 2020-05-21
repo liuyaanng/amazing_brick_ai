@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 # Environment setting
 EPISODES = 20000
-MIN_REWARD = 0.5
+MIN_REWARD = 15
 # Exploration setting
 epsilon = 1
 EPSILON_DECAY = 0.99975
@@ -39,74 +39,85 @@ if not os.path.isdir('models'):
 agent = DQNAgent()
 
 max_score = 0
-arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
-arcade.set_background_color(arcade.color.WHITE)
 episode = 0
-
+agent.tensorboard.step = episode
+current_state = env.player.get_state()
+print('init current_state', current_state)
+is_game_running = True
+episode_reward = 0
+step = 1
 def main(_delta_time):
-    global max_score
     global episode
+    global current_state
+    global is_game_running
     global epsilon
-    # print("first = ", episode)
-    agent.tensorboard.step = episode
+    global max_score
+    global episode_reward
+    global step
+    print("main current_state", current_state)
+    if np.random.random() > epsilon:
+        action = np.argmax(agent.get_qs(current_state))
+    else:
+        action = np.random.randint(0, env.ACTION_SPACE_SIZE)
+    new_state, reward, is_game_running, score = env.step(action)
+    #print(new_state)
+    #print(is_game_running)
 
-    episode_reward = 0
-    step = 1
-    current_state = env.player.get_state()
-    # print(current_state)
-    #print(current_state)
-    is_game_running = True
+    episode_reward += reward
+    #print(episode_reward)
+    if SHOW_PREVIEW and  episode % AGGREGATE_STATS_EVERY:
+        env.render()
 
-    while is_game_running:
-        if np.random.random() > epsilon:
-            action = np.argmax(agent.get_qs(current_state))
-        else:
-            action = np.random.randint(0, env.ACTION_SPACE_SIZE)
-        new_state, reward, is_game_running, score = env.step(action)
-        #print(new_state)
-        #print(is_game_running)
-        
-        episode_reward += reward
-        #print(episode_reward)
-        #if SHOW_PREVIEW and  episode % AGGREGATE_STATS_EVERY:
- #           env.render()
-            #pass
+    agent.update_replay_memory((current_state, action, reward, new_state, is_game_running))
 
-        agent.update_replay_memory((current_state, action, reward, new_state, is_game_running))
+    agent.train(is_game_running, step)
 
-        agent.train(is_game_running, step)
+    current_state = new_state
 
-        current_state = new_state
+    step += 1
 
-        step += 1
+    if score > max_score:
+        max_score = score
 
-        if score > max_score:
-            max_score = score
-
-        print('Episode %s ,Current score is %s, Max Score is %s' %(episode,score, max_score))
+    print('Episode %s ,Current score is %s, Max Score is %s' %(episode,score, max_score))
     # print(" not run")
     
     #print("run")
    #arcade.close_window()
         # Append episode reward to a list and log stats (every given number of episodes)
-    ep_rewards.append(episode_reward)
-    if not episode % AGGREGATE_STATS_EVERY or episode == 1:
-        average_reward = sum(ep_rewards[-AGGREGATE_STATS_EVERY:])/len(ep_rewards[-AGGREGATE_STATS_EVERY:])
-        min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
-        max_reward = max(ep_rewards[-AGGREGATE_STATS_EVERY:])
-        agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=epsilon)
+    agent.tensorboard.update_stats(actions = action, steps_score = score)
 
-        # Save model, but only when min reward is greater or equal a set value
-        if min_reward >= MIN_REWARD:
-            agent.model.save(f'models/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.model')
+    if not is_game_running:
 
-    # Decay epsilon
-    if epsilon > MIN_EPSILON:
-        epsilon *= EPSILON_DECAY
-        epsilon = max(MIN_EPSILON, epsilon)
-    episode += 1
-    print("final episode = ", episode)
+        ep_rewards.append(episode_reward)
+        if not episode % AGGREGATE_STATS_EVERY or episode == 1:
+            average_reward = sum(ep_rewards[-AGGREGATE_STATS_EVERY:])/len(ep_rewards[-AGGREGATE_STATS_EVERY:])
+            min_reward = min(ep_rewards[-AGGREGATE_STATS_EVERY:])
+            max_reward = max(ep_rewards[-AGGREGATE_STATS_EVERY:])
+            agent.tensorboard.update_stats(reward_avg=average_reward, reward_min=min_reward, reward_max=max_reward, epsilon=epsilon, max_score = max_score)
 
+            # Save model, but only when min reward is greater or equal a set value
+            if min_reward >= MIN_REWARD:
+                agent.model.save(f'models/{MODEL_NAME}__{max_reward:_>7.2f}max_{average_reward:_>7.2f}avg_{min_reward:_>7.2f}min__{int(time.time())}.model')
+
+        # Decay epsilon
+        if epsilon > MIN_EPSILON:
+            epsilon *= EPSILON_DECAY
+            epsilon = max(MIN_EPSILON, epsilon)
+        episode += 1
+        print("final episode = ", episode)
+        # print("first = ", episode)
+        agent.tensorboard.step = episode
+
+        episode_reward = 0
+        step = 1
+        current_state = env.player.get_state()
+        # print(current_state)
+        #print(current_state)
+        is_game_running = True
+
+arcade.open_window(SCREEN_WIDTH, SCREEN_HIGHT, 'AmazingBrick')
+arcade.set_background_color(arcade.color.WHITE)
 arcade.schedule(main, 1/60)
 arcade.run()
 arcade.close_window()

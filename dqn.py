@@ -82,24 +82,22 @@ class DQNAgent:
         else:
             model = Sequential()
 
-            model.add(Conv2D(500, (2, 2), input_shape=OBSERVATION_SPACE_VALUES))
-            model.add(Activation('relu'))
-            model.add(MaxPooling2D(pool_size = (1, 1)))
+            # model.add(Conv2D(500, (2, 2), input_shape=OBSERVATION_SPACE_VALUES))
+            # model.add(Activation('relu'))
+            # model.add(MaxPooling2D(pool_size = (1, 1)))
             # model.add(Dropout(0.2))
             
 
-            model.add(Conv2D(500, (2, 2)))
-            model.add(Activation('relu'))
-            model.add(MaxPooling2D(pool_size = (2, 2)))
+            # model.add(Conv2D(500, (2, 2)))
+            # model.add(Activation('relu'))
+            # model.add(MaxPooling2D(pool_size = (2, 2)))
             # model.add(Dropout(0.2))
 
 
-            model.add(Flatten())
-            model.add(Dense(64))
-
-
+            # model.add(Flatten(input_shape = (10, )))
+            model.add(Dense(500, input_shape = (10, ), activation = 'relu'))
             model.add(Dense(3, activation = 'linear'))
-            model.compile(loss='mse', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+            model.compile(loss='mse', optimizer=Adam(lr=0.00025), metrics=['accuracy'])
 
         return model
 

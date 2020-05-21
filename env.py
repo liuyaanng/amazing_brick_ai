@@ -160,15 +160,15 @@ class Player():
             # player botton and last tunnel top
             self.y - self.size / 2 - bottom_y - BAR_HEIGHT / 2,
             
-            next_block2_y - self.y - BLOCK_SIZE / 2 - self.size / 2,
-            next_block1_y - self.y - BLOCK_SIZE / 2 - self.size / 2,
-            self.y - next_block2_y - BLOCK_SIZE / 2 - self.size / 2,
-            self.y - next_block1_y - BLOCK_SIZE / 2 - self.size / 2,
+            # next_block2_y - self.y - BLOCK_SIZE / 2 - self.size / 2,
+            # next_block1_y - self.y - BLOCK_SIZE / 2 - self.size / 2,
+            # self.y - next_block2_y - BLOCK_SIZE / 2 - self.size / 2,
+            # self.y - next_block1_y - BLOCK_SIZE / 2 - self.size / 2,
 
-            next_block2_x - self.x - BLOCK_SIZE / 2 - self.size / 2,
-            next_block1_x - self.x - BLOCK_SIZE / 2 - self.size / 2,
-            self.x - next_block2_x - BLOCK_SIZE / 2 - self.size / 2,
-            self.x - next_block1_x - BLOCK_SIZE / 2 - self.size / 2,
+            # next_block2_x - self.x - BLOCK_SIZE / 2 - self.size / 2,
+            # next_block1_x - self.x - BLOCK_SIZE / 2 - self.size / 2,
+            # self.x - next_block2_x - BLOCK_SIZE / 2 - self.size / 2,
+            # self.x - next_block1_x - BLOCK_SIZE / 2 - self.size / 2,
             # x distance of block1 and player
             next_block1_x - self.x,
             # y distance of block1 and player
@@ -178,8 +178,9 @@ class Player():
             # y distance of block2 and player
             next_block2_y - self.y,
             self.vx, self.vy])
-        state = state.reshape(3,3,2)
-
+        # state = state.reshape(3,3,2)
+        state = state / 600
+        print(state.shape)
         return state
 
     def update(self):
@@ -190,7 +191,7 @@ class Player():
         global score
         next_tunnel = None
         next_block = None
-        delta_reward = 0  # 0.1
+        delta_reward = 0.1  # 0.1
 
         state = self.get_state()
         #print(state.shape)
@@ -201,6 +202,9 @@ class Player():
             self.highest_y_last_check = self.highest_y
             self.highest_y_check_count = 0
 
+        # print(self.useless_action_num)
+        if self.useless_action_num > NO_OP_MAX:
+            self.gg = True
         if not self.gg:
             # make sure palyer cant out of the screen
             if self.x < self.size / 2:
@@ -209,7 +213,7 @@ class Player():
                 self.x = SCREEN_WIDTH - self.size / 2
 
             for block in blocks.queue:
-                if collide((block.x + block.size / 2, block.y - block.size / 2, block.x + block.size / 2, block.y + block.size / 2),(self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)):
+                if collide((block.x - block.size / 2, block.y - block.size / 2, block.x + block.size / 2, block.y + block.size / 2),(self.x - self.size / 2, self.y - self.size / 2, self.x + self.size / 2, self.y + self.size / 2)):
                     block.touched = True
                     self.gg = True
 
@@ -220,7 +224,7 @@ class Player():
                 if self.y - self.size > next_block.y and not next_block.passed:
                     next_block.passed = True
 
-                    delta_reward += 0
+                    #delta_reward += 0
                     # score += 1
             # print("length of tunnels:",len(tunnels.queue))
             
@@ -248,11 +252,9 @@ class Player():
                 if self.y - self.size > next_tunnel.y and not next_tunnel.passed:
                     next_tunnel.passed = True
                     score += 1
-                    delta_reward += 1
+                    delta_reward = 1
                     self.useless_action_num = 0
-        # print(self.useless_action_num)
-        if self.useless_action_num > NO_OP_MAX:
-            self.gg = True
+
         self.x += self.vx
         self.y += self.vy
 
@@ -335,7 +337,7 @@ class AmazingBrickEnv():
         # action = random.randint(0,2)
         # action = 1
         self.player.action(action)
-        self.observation, reward , is_game_running= self.player.update()
+        self.observation, reward, is_game_running= self.player.update()
         # print(self.observation, reward)
         #print("score:", score)
         
@@ -386,38 +388,35 @@ class AmazingBrickEnv():
             # print("bugs", len(tunnels.queue),len(blocks.queue))
             # time.sleep(0.3)
             print("game terimnaled")
+            is_game_running = False
+            reward = -1
             self.reset()
             arcade.set_viewport(0, SCREEN_WIDTH, 0, SCREEN_HIGHT)
         
         
         #print("start render")
  
-        # if SHOW_PREVIEW:
-        self.render()
+        if SHOW_PREVIEW:
+            pass
+            # self.render()
         #image = arcade.get_image(0, 0, width = int(SCREEN_WIDTH), height = int(SCREEN_HIGHT) )
         # image.save('test.png')
         return self.observation, reward, is_game_running, score
     def render(self):
         arcade.start_render()
         # arcade.draw_circle_filled(300,200,26,arcade.color.GREEN)
-        print("into render")
-        player_x = self.player.x + self.player.size / 2
-        player_y = self.player.y + self.player.size / 2
-        print(player_x, player_y)
-        arcade.draw_circle_filled(np.random.randint(0, 800), player_y, self.player.size / 2, arcade.color.BLACK) 
-        #print(self.player.x + self.player.size / 2, self.player.y + self.player.size / 2)
- #       arcade.draw_circle_filled(self.player.x + self.player.size / 2, self.player.y + self.player.size / 2, self.player.size / 2, arcade.color.BLACK)
- #      arcade.draw_circle_filled(100, self.player.y + self.player.size / 2, self.player.size / 2, arcade.color.BLACK)
+        # print(player_x, player_y)
+        arcade.draw_circle_filled(self.player.x, self.player.y, self.player.size / 2, arcade.color.BLACK)
 
-        # if blocks.queue:
-            # for block in blocks.queue:
-                # #print(block.x, block.y)
-                # arcade.draw_circle_filled(block.x, block.y, block.size / 2, arcade.color.RED)
-        # if tunnels.queue:
-            # for tunnel in tunnels.queue:
-                # # print(tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2)
-                # arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
-                # arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+        if blocks.queue:
+            for block in blocks.queue:
+                #print(block.x, block.y)
+                arcade.draw_circle_filled(block.x, block.y, block.size / 2, arcade.color.RED)
+        if tunnels.queue:
+            for tunnel in tunnels.queue:
+                # print(tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2)
+                arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+                arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
 
 # def main():
     # ENV = AmazingBrickEnv()
