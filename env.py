@@ -180,7 +180,7 @@ class Player():
             self.vx, self.vy])
         # state = state.reshape(3,3,2)
         state = state / 600
-        print(state.shape)
+        #print(state.shape)
         return state
 
     def update(self):
@@ -191,7 +191,7 @@ class Player():
         global score
         next_tunnel = None
         next_block = None
-        delta_reward = 0.1  # 0.1
+        delta_reward = 0.0001  # 0.1
 
         state = self.get_state()
         #print(state.shape)
@@ -205,6 +205,7 @@ class Player():
         # print(self.useless_action_num)
         if self.useless_action_num > NO_OP_MAX:
             self.gg = True
+            delta_reward = -10
         if not self.gg:
             # make sure palyer cant out of the screen
             if self.x < self.size / 2:
@@ -319,11 +320,10 @@ class AmazingBrickEnv():
         return self.player.get_state()
 
 
-    def __init__(self):
+    def __init__(self, show_preview):
         """TODO: to be defined. """
         self.reset()
-        self.e = 0 # the currnet episode
-
+        self.show_preview = show_preview
         
     def step(self, action):
         """TODO: Docstring for step.
@@ -345,7 +345,7 @@ class AmazingBrickEnv():
         if self.player.y < self.game_height:
             self.player.gg = True
         changed = False
-        print("position is (%s, %s)" %(self.player.x, self.player.y))
+        #print("position is (%s, %s)" %(self.player.x, self.player.y))
     
         if self.player.y - SCREEN_HIGHT / 2 > self.game_height:
             self.game_height = self.player.y - SCREEN_HIGHT / 2
@@ -386,7 +386,7 @@ class AmazingBrickEnv():
             #tunnels.queue.clear()
             #blocks.queue.clear()
             # print("bugs", len(tunnels.queue),len(blocks.queue))
-            # time.sleep(0.3)
+            time.sleep(0.8)
             print("game terimnaled")
             is_game_running = False
             reward = -1
@@ -396,9 +396,8 @@ class AmazingBrickEnv():
         
         #print("start render")
  
-        if SHOW_PREVIEW:
-            pass
-            # self.render()
+        if self.show_preview:           
+            self.render()
         #image = arcade.get_image(0, 0, width = int(SCREEN_WIDTH), height = int(SCREEN_HIGHT) )
         # image.save('test.png')
         return self.observation, reward, is_game_running, score
@@ -406,17 +405,19 @@ class AmazingBrickEnv():
         arcade.start_render()
         # arcade.draw_circle_filled(300,200,26,arcade.color.GREEN)
         # print(player_x, player_y)
-        arcade.draw_circle_filled(self.player.x, self.player.y, self.player.size / 2, arcade.color.BLACK)
-
+        arcade.draw_rectangle_filled(self.player.x, self.player.y, self.player.size, self.player.size, arcade.color.BLACK)
+	
         if blocks.queue:
             for block in blocks.queue:
                 #print(block.x, block.y)
-                arcade.draw_circle_filled(block.x, block.y, block.size / 2, arcade.color.RED)
+                arcade.draw_rectangle_filled(block.x, block.y, block.size, block.size, arcade.color.RED)
         if tunnels.queue:
             for tunnel in tunnels.queue:
                 # print(tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2)
-                arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
-                arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+                arcade.draw_lrtb_rectangle_filled(0, tunnel.x - TUNNEL_OPENNESS / 2 - self.player.size / 2, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+                arcade.draw_lrtb_rectangle_filled(tunnel.x + TUNNEL_OPENNESS / 2 + self.player.size / 2, SCREEN_WIDTH, tunnel.y + BAR_HEIGHT / 2, tunnel.y - BAR_HEIGHT / 2, arcade.color.GREEN)
+        score_text = f"{score}"
+        arcade.draw_text(score_text, 10, self.game_height + SCREEN_HIGHT - 30, arcade.csscolor.BLACK, 18, font_name = "FreeSans")
 
 # def main():
     # ENV = AmazingBrickEnv()

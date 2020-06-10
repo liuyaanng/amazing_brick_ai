@@ -12,7 +12,10 @@ import random
 from env import *
 from cfg import *
 
-LOAD_MODEL = None
+#LOAD_MODEL = "models/amamzingbrick____20.16max____9.86avg____0.01min__1590280037.model"
+#LOAD_MODEL = "models/amamzingbrick____19.19max____8.95avg___-0.99min__1590403764.model"
+# LOAD_MODEL = "test_models/amamzingbrick____18.20max____9.91avg___-0.99min__1590379525.model"
+#LOAD_MODEL = None
 # Own Tensorboard class
 class ModifiedTensorBoard(TensorBoard):
 
@@ -46,12 +49,15 @@ class ModifiedTensorBoard(TensorBoard):
         self._write_logs(stats, self.step)
 
 
-class DQNAgent:
+class DQNAgent():
 
     """Docstring for DQNAgent. """
 
-    def __init__(self):
+    def __init__(self, load_model):
         """TODO: to be defined. """
+
+        self.load_model = load_model
+        print(load_model)
 
         # Main model
         self.model = self.create_model()
@@ -75,10 +81,10 @@ class DQNAgent:
         :returns: TODO
 
         """
-        if LOAD_MODEL is not None:
-            print(f"Loading {LOAD_MODEL}")
-            model = load_model(LOAD_MODEL)
-            print(f"Model {LOAD_MODEL} loaded")
+        if self.load_model is not None:
+            print(f"Loading {self.load_model}")
+            model = load_model(self.load_model)
+            print(f"Model {self.load_model} loaded")
         else:
             model = Sequential()
 
@@ -115,9 +121,11 @@ class DQNAgent:
         :returns: TODO
 
         """
+        #print(state.shape)
+        #print(np.array(state).reshape(-1, *state.shape).shape)
         return self.model.predict(np.array(state).reshape(-1, *state.shape))[0]
 
-    def train(self, terminal_state, step):
+    def train(self, terminal_state):
         """TODO: Docstring for trian.
 
         :terminal_state: TODO
@@ -132,6 +140,7 @@ class DQNAgent:
 
 
         current_states = np.array([transition[0] for transition in minibatch])
+        #print(current_states.shape)
         current_qs_list = self.model.predict(current_states)
 
 
